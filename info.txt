@@ -1,0 +1,5 @@
+The Global Mart Project
+
+Current State: A messy, manual deployment on single server.
+
+End Goal: A fully automated, containrized, high availibility microservices architecture on AWS with CI/CD.
