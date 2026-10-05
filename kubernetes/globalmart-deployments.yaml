@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: globalmart
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: globalmart
+
+  template:
+    metadata:
+      labels:
+        app: globalmart
+
+    spec:
+      containers:
+        - name: globalmart
+          image: tejas85852/globalmart:latest
+
+          ports:
+            - containerPort: 80
