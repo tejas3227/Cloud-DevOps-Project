@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 secrets/
+Git Dockerhub Python Production Notes.md
 
 # Database backups and local data
 *.sql
