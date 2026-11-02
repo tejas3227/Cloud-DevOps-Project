@@ -14,6 +14,15 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+
+                script {
+                    env.IMAGE_TAG = sh(
+                        script: 'git rev-parse --short=12 HEAD',
+                        returnStdout: true
+                    ).trim()
+                }
+
+                echo "Building image with Git commit: ${IMAGE_TAG}"
             }
         }
 
@@ -21,8 +30,7 @@ pipeline {
             steps {
                 sh '''
                     docker build \
-                      -t ${IMAGE_NAME}:${BUILD_NUMBER} \
-                      -t ${IMAGE_NAME}:latest .
+                      -t ${IMAGE_NAME}:${IMAGE_TAG} .
                 '''
             }
         }
@@ -40,8 +48,7 @@ pipeline {
                         echo "$DOCKERHUB_TOKEN" | docker login \
                           -u "$DOCKERHUB_USERNAME" --password-stdin
 
-                        docker push ${IMAGE_NAME}:${BUILD_NUMBER}
-                        docker push ${IMAGE_NAME}:latest
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
 
                         docker logout
                     '''
