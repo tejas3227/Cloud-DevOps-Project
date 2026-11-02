@@ -1,0 +1,92 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile       # Use the Dockerfile in the current directory to build the image
+    image: person-registration-app:v1         # python gunicorn app image
+    container_name: person-registration-app     # Name of the container
+    secrets:            # Load secrets from the Docker secrets feature, which allows you to securely manage sensitive information such as database credentials
+      - db_password
+      - flask_secret_key
+    environment:
+      DB_HOST: mariadb
+      DB_PORT: "3306"
+      DB_USER: ${DB_USER:?Set this in .env}
+      DB_NAME: ${DB_NAME:?Set this in .env}
+      DB_PASSWORD_FILE: /run/secrets/db_password
+      SECRET_KEY_FILE: /run/secrets/flask_secret_key
+      APP_ENV: production 
+    ports:
+      - "8000:8000"
+    depends_on:
+      mariadb:
+        condition: service_healthy     # Wait for the mariadb service to be healthy before starting the app service
+    networks:
+      - app-network          # Connect the app service to the app-network(new network created for this project)
+    
+    security_opt:
+      - no-new-privileges:true      #Prevents gaining additional privileges
+
+    read_only: true   # Makes the container root filesystem read-only  
+
+    tmpfs:
+      - /tmp:size=64M,mode=1777     #Provides temporary writable storage for /tmp as Python libraries may need temporary writable space
+
+    logging:                  # Configure logging for the container to use the json-file driver with a maximum size of 10MB and a maximum of 3 log files
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    restart: unless-stopped       # Restart the container unless it is explicitly stopped
+
+  mariadb:
+    image: mariadb:10.11              # Use the official MariaDB image version 10.11
+    container_name: person-registration-db        # Name of the container
+    secrets:            # Load secrets from the Docker secrets feature, which allows you to securely manage sensitive information such as database credentials
+      - db_password
+      - db_root_password
+    environment:
+      #MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?Set this in .env}
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MARIADB_DATABASE: ${DB_NAME:?Set this in .env}
+      MARIADB_USER: ${DB_USER:?Set this in .env}
+      #MARIADB_PASSWORD: ${DB_PASSWORD:?Set this in .env}
+      MARIADB_PASSWORD_FILE: /run/secrets/db_password     # Use the secret file for the database password instead of passing it directly as an environment variable
+    volumes:
+      - mariadb_data:/var/lib/mysql           # Persist the database data in a named volume to ensure data is not lost when the container is removed
+      - ./db/init:/docker-entrypoint-initdb.d:ro      # Mount the init directory to run initialization scripts when the container starts
+    networks:
+      - app-network       # Connect the mariadb service to the app-network(new network created for this project)
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]    # Check the health of the mariadb service by running the healthcheck.sh script with the specified arguments
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    restart: unless-stopped    # Restart the container unless it is explicitly stopped
+
+networks:
+  app-network:      # Define a custom network for the services to communicate with each other
+    driver: bridge      # Use the bridge driver for the network 
+
+volumes:
+  mariadb_data:       # Define a named volume to persist the database data
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt        # Use a file to store the database password securely, which will be mounted as a secret in the containers
+  
+  db_root_password:
+    file: ./secrets/db_root_password.txt    # Use a file to store the root password for the database securely, which will be mounted as a secret in the containers
+  
+  flask_secret_key:
+    file: ./secrets/flask_secret_key.txt   # Use a file to store the Flask secret key securely, which will be mounted as a secret in the containers

@@ -1,0 +1,18 @@
+.env
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+secrets/
+
+# Database backups and local data
+*.sql
+*.sql.gz
+
+# Environment and secrets
+.env.*
+secrets/
+
+# Python virtual environments
+.venv/
+venv/

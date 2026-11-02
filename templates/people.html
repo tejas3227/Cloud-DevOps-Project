@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered People</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="people-container">
+        <h1>Registered People</h1>
+        <p>People registered through the application.</p>
+
+        <div class="table-wrapper">
+            <table class="people-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>City</th>
+                        <th>Registered At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for person in people %}
+                    <tr>
+                        <td>{{ person.id }}</td>
+                        <td>{{ person.full_name }}</td>
+                        <td>{{ person.email }}</td>
+                        <td>{{ person.phone }}</td>
+                        <td>{{ person.city }}</td>
+                        <td>{{ person.created_at }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">No registrations yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <a class="view-link" href="{{ url_for('home') }}">
+            Back to Registration Form
+        </a>
+    </main>
+</body>
+</html>
