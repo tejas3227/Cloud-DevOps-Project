@@ -4,7 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile       # Use the Dockerfile in the current directory to build the image
-    image: person-registration-app:v1         # python gunicorn app image
+    #image: person-registration-app:v1         # python gunicorn app image
+    image: ${IMAGE_NAME:?Set IMAGE_NAME}:${IMAGE_TAG:?Set IMAGE_TAG}   # used for local deployment in centos, dynamic git commit hash
     container_name: person-registration-app     # Name of the container
     secrets:            # Load secrets from the Docker secrets feature, which allows you to securely manage sensitive information such as database credentials
       - db_password
