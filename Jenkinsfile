@@ -8,9 +8,13 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'tejas85852/person-registration-app'
+        NAMESPACE = 'person-registration'
+        RELEASE_NAME = 'person-registration'
+        CHART_PATH = './person-registration'
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -22,7 +26,7 @@ pipeline {
                     ).trim()
                 }
 
-                echo "Building image with Git commit: ${IMAGE_TAG}"
+                echo "Building image: ${IMAGE_NAME}:${IMAGE_TAG}"
             }
         }
 
@@ -45,6 +49,8 @@ pipeline {
                     )
                 ]) {
                     sh '''
+                        set -e
+
                         echo "$DOCKERHUB_TOKEN" | docker login \
                           -u "$DOCKERHUB_USERNAME" --password-stdin
 
@@ -55,5 +61,42 @@ pipeline {
                 }
             }
         }
+
+        stage('Validate Helm Chart') {
+            steps {
+                sh '''
+                    helm lint ${CHART_PATH}
+                '''
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                    helm upgrade --install ${RELEASE_NAME} ${CHART_PATH} \
+                      --namespace ${NAMESPACE} \
+                      --set-string app.image.tag=${IMAGE_TAG} \
+                      --wait \
+                      --timeout 5m
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                sh '''
+                    kubectl rollout status \
+                      deployment/person-registration-app \
+                      -n ${NAMESPACE} \
+                      --timeout=300s
+
+                    kubectl get pods -n ${NAMESPACE}
+
+                    kubectl get deployment person-registration-app \
+                      -n ${NAMESPACE}
+                '''
+            }
+        }
     }
 }
+

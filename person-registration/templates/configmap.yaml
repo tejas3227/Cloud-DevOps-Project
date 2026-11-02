@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+  namespace: {{ .Release.Namespace }}
+data:
+  APP_ENV: {{ .Values.app.env.appEnv | quote }}
+  DB_HOST: {{ printf "%s-mariadb" .Release.Name | quote }}
+  DB_PORT: {{ .Values.app.env.dbPort | quote }}
+  DB_USER: {{ .Values.app.env.dbUser | quote }}
+  DB_NAME: {{ .Values.app.env.dbName | quote }}

@@ -1,0 +1,65 @@
+# Flask application
+app:
+  replicaCount: 2
+
+  image:
+    repository: tejas85852/person-registration-app
+    tag: "dd94068515e6"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+  env:
+    appEnv: production
+    dbPort: "3306"
+    dbUser: person_app
+    dbName: person_registration
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# MariaDB database
+mariadb:
+  image:
+    repository: mariadb
+    tag: "10.11"
+
+  service:
+    port: 3306
+
+  auth:
+    database: person_registration
+    username: person_app
+
+  persistence:
+    enabled: true
+    size: 2Gi
+    accessModes:
+      - ReadWriteOnce
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Ingress
+ingress:
+  enabled: true
+  className: nginx
+  host: person-registration.local
+
+# Security defaults
+security:
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true

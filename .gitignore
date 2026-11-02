@@ -1,19 +1,43 @@
+
+# Environment variables and secrets
 .env
+.env.*
+!.env.example
+secrets/
+person-registration/secrets.local.yaml
+
+# Python virtual environments
 venv/
+.venv/
+
+# Python cache and test files
 __pycache__/
 *.py[cod]
 .pytest_cache/
-secrets/
-Git Dockerhub Python Production Notes.md
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 
 # Database backups and local data
 *.sql
 *.sql.gz
 
-# Environment and secrets
-.env.*
-secrets/
+# IDE and editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Python virtual environments
-.venv/
-venv/
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Project notes
+Git Dockerhub Python Production Notes.md
+
