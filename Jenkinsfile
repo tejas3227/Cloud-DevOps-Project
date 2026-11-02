@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_NAME = 'tejas4545/person-registration-app'
+        IMAGE_NAME = 'tejas85852/person-registration-app'
     }
 
     stages {
